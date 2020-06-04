@@ -33,37 +33,63 @@ class ToDo:
     def menu(self):
         """Prints menu items and accepts user choice"""
         print('1) Today\'s tasks')
-        print('2) Add task')
+        print('2) Week\'s tasks')
+        print('3) All tasks')
+        print('4) Add task')
         print('0) Exit')
         self.menu_choice = input()
 
-    def show_tasks(self):
-        """Shows tasks from the database"""
-        tasks = self.session.query(self.Table).all()
-        print('Today:')
+    def show_today_tasks(self):
+        tasks = self.session.query(self.Table).filter(self.Table.deadline == datetime.today()).all()
+        print(f'Today {datetime.today().strftime("%d %b")}:')
         if tasks:
             for task in tasks:
                 print(f'{task}')
         else:
             print('Nothing to do!')
+        print()
+
+    def show_weeks_tasks(self):
+        pass
+
+    def show_all_tasks(self):
+        """Shows all tasks from the database"""
+        tasks = self.session.query(self.Table).all()
+        print('All tasks:')
+        if tasks:
+            for task in tasks:
+                print(f'{task}')
+        else:
+            print('Nothing to do!')
+        print()
 
     def add_task(self):
         """Add a task to the database"""
         print('Enter task')
-        new_task = self.Table(task=input(), deadline=datetime.today())  # strftime('%m-%d-%Y')
+        text_task = input()
+        print('Enter deadline')
+        deadline = datetime.strptime(input(), '%Y-%m-%d')
+        new_task = self.Table(task=text_task, deadline=deadline)  # strftime('%m-%d-%Y')
         self.session.add(new_task)
         self.session.commit()
         print('The task has been added!')
+        print()
 
     def run(self):
         """Main logic of the program"""
-        self.menu()
-        if self.menu_choice == '1':
-            self.show_tasks()
-        elif self.menu_choice == '2':
-            self.add_task()
-        else:
-            print('Bye!')
+        while True:
+            self.menu()
+            if self.menu_choice == '1':
+                self.show_today_tasks()
+            elif self.menu_choice == '2':
+                self.show_weeks_tasks()
+            elif self.menu_choice == '3':
+                self.show_all_tasks()
+            elif self.menu_choice == '4':
+                self.add_task()
+            else:
+                print('Bye!')
+                break
 
 
 if __name__ == '__main__':
