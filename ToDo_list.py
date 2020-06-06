@@ -105,6 +105,7 @@ class ToDo:
         print()
 
     def delete_task(self):
+        """Delete a chosen task from the database"""
         tasks = self.session.query(self.Table).order_by(self.Table.deadline).all()
         if tasks:
             print('Chose the number of the task you want to delete:')
