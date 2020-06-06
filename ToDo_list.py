@@ -1,8 +1,12 @@
+# JetBrains Academy/Python Developer
+# Project: To-Do List
+# Work on project. Stage 3/4: Deadlines are scary
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, date
+from datetime import datetime, timedelta
 
 
 class ToDo:
@@ -40,17 +44,28 @@ class ToDo:
         self.menu_choice = input()
 
     def show_today_tasks(self):
-        tasks = self.session.query(self.Table).filter(self.Table.deadline == datetime.today()).all()
-        print(f'Today {datetime.today().strftime("%d %b")}:')
+        """Outputs all tasks for today"""
+        today = datetime.today()
+        tasks = self.session.query(self.Table).filter(self.Table.deadline == today.strftime('%Y-%m-%d')).all()
+        print(f'Today {today.strftime("%d %b")}:')
         if tasks:
-            for task in tasks:
-                print(f'{task}')
+            for n, task in enumerate(tasks, 1):
+                print(f'{n}. {task.task}')
         else:
             print('Nothing to do!')
         print()
 
     def show_weeks_tasks(self):
-        pass
+        """Outputs all tasks for next seven days"""
+        for day in [datetime.today() + timedelta(days=i) for i in range(7)]:
+            tasks = self.session.query(self.Table).filter(self.Table.deadline == day.strftime('%Y-%m-%d')).all()
+            print(f'{day.strftime("%A")} {day.strftime("%d %b")}:')
+            if tasks:
+                for n, task in enumerate(tasks, 1):
+                    print(f'{n}. {task.task}')
+            else:
+                print('Nothing to do!')
+            print()
 
     def show_all_tasks(self):
         """Shows all tasks from the database"""
@@ -58,7 +73,7 @@ class ToDo:
         print('All tasks:')
         if tasks:
             for task in tasks:
-                print(f'{task}')
+                print(f'{task}. {task.deadline.strftime("%d %b")}')
         else:
             print('Nothing to do!')
         print()
@@ -68,8 +83,7 @@ class ToDo:
         print('Enter task')
         text_task = input()
         print('Enter deadline')
-        deadline = datetime.strptime(input(), '%Y-%m-%d')
-        new_task = self.Table(task=text_task, deadline=deadline)  # strftime('%m-%d-%Y')
+        new_task = self.Table(task=text_task, deadline=datetime.strptime(input(), '%Y-%m-%d'))  # strftime('%m-%d-%Y')
         self.session.add(new_task)
         self.session.commit()
         print('The task has been added!')
